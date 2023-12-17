@@ -1,1 +1,84 @@
+import random
+import re
+
+class CustomerServiceChatbot:
+    NEGATIVE_RESPONSES = ("no", "nope", "nah", "naw", "not a chance", "sorry")
+    EXIT_COMMANDS = ("quit", "pause", "exit", "goodbye", "bye", "later")
+
+    COMMON_QUESTIONS = (
+        "How can I assist you with your order today?",
+        "Do you have any questions about our products or services?",
+        "Is there anything specific you would like to know about your account?",
+        "Can I help you track your recent purchase?",
+        "Are you experiencing any issues with our website or app?"
+    )
+
+    def __init__(self):
+        self.customer_babble = {
+            'order_status_intent': r'.*\s*order.*status.*',
+            'product_info_intent': r'.*\s*product.*info.*',
+            'account_info_intent': r'.*\s*account.*info.*'
+        }
+
+    def greet(self):
+        self.name = input("Welcome! What is your name?\n")
+        will_help = input(f"Hi {self.name}, I am a bot from Customer Service. How can I assist you today?\n")
+        if will_help.lower() in self.NEGATIVE_RESPONSES:
+            print("Have a great day!")
+            return
+        self.chat()
+
+    def make_exit(self, reply):
+        for command in self.EXIT_COMMANDS:
+            if reply == command:
+                print("Thank you for reaching out. Have a great day!")
+                return True
+        return False
+
+    def chat(self):
+        reply = input(random.choice(self.COMMON_QUESTIONS)).lower()
+        while not self.make_exit(reply):
+            reply = input(self.match_reply(reply))
+
+    def match_reply(self, reply):
+        found_match = None
+        for intent, regex_pattern in self.customer_babble.items():
+            found_match = re.match(regex_pattern, reply)
+            if found_match:
+                break
+
+        if found_match:
+            if intent == 'order_status_intent':
+                return self.order_status_intent()
+            elif intent == 'product_info_intent':
+                return self.product_info_intent()
+            elif intent == 'account_info_intent':
+                return self.account_info_intent()
+
+        return self.no_match_intent()
+
+    def order_status_intent(self):
+        responses = ("Let me check the status of your order. Please provide your order number.\n",
+                     "Sure, I can help you with that. Could you please share your order details?\n")
+        return random.choice(responses)
+
+    def product_info_intent(self):
+        responses = ("Absolutely! What product are you interested in? I can provide details and specifications.\n",
+                     "Great choice! Which specific product information are you looking for?\n")
+        return random.choice(responses)
+
+    def account_info_intent(self):
+        responses = ("Sure, I can help you with your account information. Could you please provide your account details?\n",
+                     "Of course! What specific account information do you need assistance with?\n")
+        return random.choice(responses)
+
+    def no_match_intent(self):
+        responses = ("I'm sorry, I didn't catch that. Could you please provide more details?\n",
+                     "I'm here to help! Can you provide more information or ask your question differently?\n",
+                     "I didn't quite get that. Could you please clarify or rephrase your question?\n")
+        return random.choice(responses)
+
+# Example usage
+customer_bot = CustomerServiceChatbot()
+customer_bot.greet()
 
