@@ -78,7 +78,6 @@ class CustomerServiceChatbot:
                      "I didn't quite get that. Could you please clarify or rephrase your question?\n")
         return random.choice(responses)
 
-# Example usage
 customer_bot = CustomerServiceChatbot()
 customer_bot.greet()
 
