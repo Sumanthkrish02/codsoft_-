@@ -1,0 +1,44 @@
+from surprise import Dataset, Reader
+from surprise.model_selection import train_test_split
+from surprise import KNNBasic
+from surprise import accuracy
+
+data = [
+    ('User1', 'Movie1', 5),
+    ('User1', 'Movie2', 4),
+    ('User2', 'Movie1', 3),
+    ('User2', 'Movie2', 5),
+    ('User3', 'Movie1', 4),
+    ('User3', 'Movie2', 2),
+    ('User3', 'Movie3', 3),
+]
+
+read = Reader(rating_scale=(1, 5))
+dataset = Dataset.load_from_df(data, read)
+
+trainset, test_set = train_test_split(dataset, test_size=0.25)
+
+s_options = {
+    'name': 'cosine',
+    'user_based': True,
+}
+
+model = KNNBasic(s_options=s_options)
+model.fit(trainset)
+
+predictions = model.test(test_set)
+accuracy.rmse(predictions)
+
+user_id = 'User1'
+user_movies = [item[0] for item in data if item[0] == user_id]
+unrated_movies = list(set([item[1] for item in data]) - set(user_movies))
+
+user_ratings = [(user_id, movie, 0) for movie in unrated_movies]
+predictions = model.test(user_ratings)
+
+top_n = [(prediction.iid, prediction.est) for prediction in predictions]
+top_n = sorted(top_n, key=lambda x: x[1], reverse=True)[:5]
+
+print(f"Top 5 recommended movies for {user_id}:")
+for movie, rating in top_n:
+    print(f"{movie} (predicted rating: {rating:.2f})")
